@@ -67,8 +67,7 @@ function General() {
           <div className="d-flex ">
             <button
               type="submit"
-              className="btn btn-primary btn-lg mb-3 mt-3 me-lg-5 ms-auto"
-              style={{ paddingTop: "0px" }}
+              className="btn btn-primary btn-lg mb-3 mt-3 me-lg-5 ms-auto pt-0 pt-md-1"
             >
               Send
             </button>

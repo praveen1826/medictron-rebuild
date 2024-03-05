@@ -1,10 +1,10 @@
 import "./App.css";
 import { BrowserRouter } from "react-router-dom";
 import { Routes, Route } from "react-router-dom";
-import NavigationBar from "../components/NavigationBar";
-import General from "../components/General";
-import Diabetes from "../components/Diabetes";
-import Parkinson from "../components/Parkinson";
+import NavigationBar from "./components/NavigationBar";
+import General from "./components/General";
+import Diabetes from "./components/Diabetes";
+import Parkinson from "./components/Parkinson";
 
 function App() {
   return (

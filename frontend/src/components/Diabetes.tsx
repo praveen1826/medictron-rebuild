@@ -53,16 +53,19 @@ function Diabetes() {
     DiabetesPedigreeFunction: 0.627,
     Age: 50,
   });
+  const [data, setData] = useState("");
 
   // console.log(attributesArray);
 
-  const postMessage = (formData: any) => {
+  const postMessage = async (formData: any) => {
     try {
-      fetchEventSource("http://localhost:8000/diabetes", {
+      await fetchEventSource("http://localhost:8000/diabetes", {
         method: "Post",
         body: formData,
+        openWhenHidden: true,
         onmessage(ev) {
           console.log(ev.data);
+          setData(ev.data);
         },
       });
     } catch (error) {
@@ -85,7 +88,9 @@ function Diabetes() {
   };
 
   return (
-    <div>
+    <div
+      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+    >
       <form
         className="d-flex flex-column flex-wrap"
         style={{ width: "95vw" }}
@@ -103,11 +108,27 @@ function Diabetes() {
         </div>
 
         <div className="d-flex">
-          <button type="submit" className="btn btn-primary m-3 ms-auto">
+          <button
+            type="submit"
+            className="btn btn-primary m-3 ms-auto pt-0 pt-md-1"
+          >
             Send
           </button>
         </div>
       </form>
+      <div className="mb-3">
+        <label htmlFor="answer" className="form-label">
+          Answer
+        </label>
+        <textarea
+          className="form-control me-lg-5 mt-lg-2 mb-lg-2"
+          id="answer"
+          rows={5}
+          value={data}
+          readOnly={true}
+          style={{ width: "92vw" }}
+        ></textarea>
+      </div>
     </div>
   );
 }

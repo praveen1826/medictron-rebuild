@@ -10,8 +10,9 @@ fastapi = "*"
 langchain-google-genai = "*"
 python-dotenv = "*"
 uvicorn = "*"
-scikit-learn = "*"
 python-multipart = "*"
+langchainhub = "*"
+scikit-learn = "==1.2.2"
 
 [dev-packages]
 

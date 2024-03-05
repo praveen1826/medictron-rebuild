@@ -5,8 +5,11 @@ from fastapi import FastAPI, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from diseases.diabetes import Diabetes
+from langchain.globals import set_debug
 
 load_dotenv()
+
+set_debug(True)
 
 template = """Answer the question in short and conscise format
             Question: {question}
@@ -64,7 +67,13 @@ async def diabetes_chat(Pregnancies: int = Form(...),
     }
     print(attributes)
 
-    def fake_stream():
-        for i in range(10):
-            yield f"data: {i}\n\n"
-    return StreamingResponse(fake_stream(), media_type="text/event-stream")
+    diabetesAgentExecutor = Diabetes(llm=llm).diabetesAgentExecutor
+
+    def diabetes_stream(attributes):
+        output = diabetesAgentExecutor.invoke(
+            {"input": """"Use the diagnostic tool to check for diabetes using the given health details. 
+              If the result is diabetes =[0], there’s no disease. If it’s diabetes =[1], the disease is present.
+              After the analysis, respond with suitable information. Input: """ + str(attributes)})
+        yield f"data: {output['output']}\n\n"
+
+    return StreamingResponse(diabetes_stream(attributes=attributes), media_type="text/event-stream")

@@ -1,5 +1,6 @@
 from langchain.agents import tool, create_react_agent, AgentExecutor
 from langchain.prompts import ChatPromptTemplate
+from langchain import hub
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 import pickle
@@ -12,16 +13,18 @@ class Diabetes:
         self.llm = llm
         self.tool_list = [self.diabetes]
         self.diabetesPrompt = ChatPromptTemplate.from_template(
-            template="""Use a tool and check if there is diabetes or not """)
+            template="""Use a tool and check if there is diabetes or not
+             input: {attributes}""")
+        prompt = hub.pull("hwchase17/react")
 
         self.diabetesAgent = create_react_agent(
-            self.llm, self.tool_list, self.diabetesPrompt)
+            llm=self.llm, tools=self.tool_list, prompt=prompt)
 
         self.diabetesAgentExecutor = AgentExecutor(agent=self.diabetesAgent, tools=self.tool_list, handle_parsing_errors=True,
                                                    max_iterations=5,
                                                    verbose=True)
 
-    @tool(return_direct=True)
+    @tool
     def diabetes(query: str) -> str:
         """Takes in a dictionary of key value pairs in this order {
         'Pregnancies': 6,
