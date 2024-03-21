@@ -1,4 +1,5 @@
 from langchain.agents import tool, create_react_agent, AgentExecutor
+from langchain.prompts import ChatPromptTemplate
 from langchain import hub
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -17,11 +18,21 @@ class Parkinson:
         self.parkinsonAgent = create_react_agent(
             llm=self.llm, tools=self.tool_list, prompt=prompt)
 
+        template = """context:
+                        If the result is parkinson =[0], there’s no disease. If it’s parkinson =[1], the disease is present.
+                        Result: {result}
+                        "based on the context reply appropriately to the patient"""
+
+        self.parkinsonPrompt = ChatPromptTemplate.from_template(
+            template=template)
+
+        self.parkinsonChain = self.parkinsonPrompt | self.llm
+
         self.parkinsonAgentExecutor = AgentExecutor(agent=self.parkinsonAgent, tools=self.tool_list, handle_parsing_errors=True,
                                                     max_iterations=5,
                                                     verbose=True)
 
-    @tool
+    @tool(return_direct=True)
     def parkinson(query: str) -> str:
         """Takes in a dictionary of key value pairs in this order {
         'MDVP:Fo(Hz)': 119.99200,

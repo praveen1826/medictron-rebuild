@@ -55,14 +55,37 @@ function Diabetes() {
   });
   const [data, setData] = useState("");
 
+  const removeContent = (text: string) => {
+    return text.replace(/content="/g, "");
+  };
+
   // console.log(attributesArray);
 
   const postMessage = async (formData: any) => {
+    let temp_data = "";
     try {
       await fetchEventSource("http://localhost:8000/diabetes", {
         method: "Post",
         body: formData,
         openWhenHidden: true,
+        onmessage(ev) {
+          console.log(ev.data);
+          temp_data += removeContent(String(ev.data));
+          console.log(temp_data);
+          setData(temp_data);
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const postDirectResult = (formData: any) => {
+    try {
+      fetchEventSource("http://localhost:8000/diabetes-direct", {
+        method: "POST",
+        openWhenHidden: true,
+        body: formData,
         onmessage(ev) {
           console.log(ev.data);
           setData(ev.data);
@@ -87,9 +110,26 @@ function Diabetes() {
     postMessage(formData);
   };
 
+  const handleDirectResult = (e: any) => {
+    e.preventDefault();
+    let formData = new FormData();
+    for (let key in attributes) {
+      formData.append(key, String(attributes[key as keyof Attributes]));
+    }
+    console.log(formData);
+    postDirectResult(formData);
+  };
+
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        backgroundColor: "#FFC7C7",
+        flexGrow: 1,
+        margin: "5px",
+      }}
     >
       <form
         className="d-flex flex-column flex-wrap"
@@ -107,7 +147,14 @@ function Diabetes() {
           ))}
         </div>
 
-        <div className="d-flex">
+        <div className="d-flex ms-auto">
+          <button
+            type="button"
+            className="btn btn-primary m-3 ms-auto pt-0 pt-md-1"
+            onClick={handleDirectResult}
+          >
+            Direct Result
+          </button>
           <button
             type="submit"
             className="btn btn-primary m-3 ms-auto pt-0 pt-md-1"
@@ -121,7 +168,7 @@ function Diabetes() {
           Answer
         </label>
         <textarea
-          className="form-control me-lg-5 mt-lg-2 mb-lg-2"
+          className="form-control"
           id="answer"
           rows={5}
           value={data}

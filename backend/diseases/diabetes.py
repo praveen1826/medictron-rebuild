@@ -20,11 +20,21 @@ class Diabetes:
         self.diabetesAgent = create_react_agent(
             llm=self.llm, tools=self.tool_list, prompt=prompt)
 
+        template = """context:
+                        If the result is diabetes =[0], there’s no disease. If it’s diabetes =[1], the disease is present.
+                        Result: {result}
+                        "based on the context reply appropriately to the patient"""
+
+        self.diabetesPrompt = ChatPromptTemplate.from_template(
+            template=template)
+
+        self.diabetesChain = self.diabetesPrompt | self.llm
+
         self.diabetesAgentExecutor = AgentExecutor(agent=self.diabetesAgent, tools=self.tool_list, handle_parsing_errors=True,
                                                    max_iterations=5,
                                                    verbose=True)
 
-    @tool
+    @tool(return_direct=True)
     def diabetes(query: str) -> str:
         """Takes in a dictionary of key value pairs in this order {
         'Pregnancies': 6,

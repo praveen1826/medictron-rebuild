@@ -2,7 +2,7 @@ import "./NavigationBar.css";
 
 function NavigationBar() {
   return (
-    <div className="navContainer">
+    <div className="navContainer" style={{ width: "100%" }}>
       <nav
         className="navbar navbar-expand-lg"
         style={{ backgroundColor: "#5E1675", margin: "5px" }}

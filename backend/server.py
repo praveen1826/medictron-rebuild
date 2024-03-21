@@ -45,6 +45,88 @@ async def general_chat(request: Request):
     return StreamingResponse(stream_text(body), media_type="text/event-stream")
 
 
+@app.post("/diabetes-direct")
+async def general_chat(Pregnancies: int = Form(...),
+                       Glucose: int = Form(...),
+                       BloodPressure: int = Form(...),
+                       SkinThickness: int = Form(...),
+                       Insulin: int = Form(...),
+                       BMI: float = Form(...),
+                       DiabetesPedigreeFunction: float = Form(...),
+                       Age: int = Form(...)):
+    attributes = {
+        "Pregnancies": Pregnancies,
+        "Glucose": Glucose,
+        "BloodPressure": BloodPressure,
+        "SkinThickness": SkinThickness,
+        "Insulin": Insulin,
+        "BMI": BMI,
+        "DiabetesPedigreeFunction": DiabetesPedigreeFunction,
+        "Age": Age
+    }
+
+    diabetes_direct = Diabetes(llm=llm).diabetes(str(attributes))
+
+    def stream_text():
+        yield f"data: {diabetes_direct}\n\n"
+    return StreamingResponse(stream_text(), media_type="text/event-stream")
+
+
+@app.post("/parkinson-direct")
+async def general_chat(MDVP_Fo_Hz: float = Form(...),
+                       MDVP_Fhi_Hz: float = Form(...),
+                       MDVP_Flo_Hz: float = Form(...),
+                       MDVP_Jitter_Percent: float = Form(...),
+                       MDVP_Jitter_Abs: float = Form(...),
+                       MDVP_RAP: float = Form(...),
+                       MDVP_PPQ: float = Form(...),
+                       Jitter_DDP: float = Form(...),
+                       MDVP_Shimmer: float = Form(...),
+                       MDVP_Shimmer_dB: float = Form(...),
+                       Shimmer_APQ3: float = Form(...),
+                       Shimmer_APQ5: float = Form(...),
+                       MDVP_APQ: float = Form(...),
+                       Shimmer_DDA: float = Form(...),
+                       NHR: float = Form(...),
+                       HNR: float = Form(...),
+                       RPDE: float = Form(...),
+                       DFA: float = Form(...),
+                       spread1: float = Form(...),
+                       spread2: float = Form(...),
+                       D2: float = Form(...),
+                       PPE: float = Form(...)):
+    attributes = {
+        "MDVP:Fo(Hz)": MDVP_Fo_Hz,
+        "MDVP:Fhi(Hz)": MDVP_Fhi_Hz,
+        "MDVP:Flo(Hz)": MDVP_Flo_Hz,
+        "MDVP:Jitter(%)": MDVP_Jitter_Percent,
+        "MDVP:Jitter(Abs)": MDVP_Jitter_Abs,
+        "MDVP:RAP": MDVP_RAP,
+        "MDVP:PPQ": MDVP_PPQ,
+        "Jitter:DDP": Jitter_DDP,
+        "MDVP:Shimmer": MDVP_Shimmer,
+        "MDVP:Shimmer(dB)": MDVP_Shimmer_dB,
+        "Shimmer:APQ3": Shimmer_APQ3,
+        "Shimmer:APQ5": Shimmer_APQ5,
+        "MDVP:APQ": MDVP_APQ,
+        "Shimmer:DDA": Shimmer_DDA,
+        "NHR": NHR,
+        "HNR": HNR,
+        "RPDE": RPDE,
+        "DFA": DFA,
+        "spread1": spread1,
+        "spread2": spread2,
+        "D2": D2,
+        "PPE": PPE
+    }
+
+    parkinson_direct = Parkinson(llm=llm).parkinson(str(attributes))
+
+    def stream_text():
+        yield f"data: {parkinson_direct}\n\n"
+    return StreamingResponse(stream_text(), media_type="text/event-stream")
+
+
 @app.post("/diabetes")
 async def diabetes_chat(Pregnancies: int = Form(...),
                         Glucose: int = Form(...),
@@ -67,14 +149,19 @@ async def diabetes_chat(Pregnancies: int = Form(...),
     }
     print(attributes)
 
-    diabetesAgentExecutor = Diabetes(llm=llm).diabetesAgentExecutor
+    diabetes = Diabetes(llm=llm)
+
+    diabetesAgentExecutor = diabetes.diabetesAgentExecutor
+
+    diabetesChain = diabetes.diabetesChain
 
     def diabetes_stream(attributes):
         output = diabetesAgentExecutor.invoke(
-            {"input": """"Use the diagnostic tool to check for diabetes using the given health details. 
+            {"input": """Use the diagnostic tool to check for diabetes using the given health details. 
               If the result is diabetes =[0], there’s no disease. If it’s diabetes =[1], the disease is present.
               After the analysis, respond with suitable information. Input: """ + str(attributes)})
-        yield f"data: {output['output']}\n\n"
+        for chunk in diabetesChain.stream({"result": str(output["output"])}):
+            yield f"data: {chunk}\n\n"
 
     return StreamingResponse(diabetes_stream(attributes=attributes), media_type="text/event-stream")
 
@@ -131,13 +218,18 @@ async def parkinson_chat(MDVP_Fo_Hz: float = Form(...),
 
     print(attributes)
 
-    parkinsonAgentExecutor = Parkinson(llm=llm).parkinsonAgentExecutor
+    parkinson = Parkinson(llm=llm)
+
+    parkinsonAgentExecutor = parkinson.parkinsonAgentExecutor
+
+    parkinsonChain = parkinson.parkinsonChain
 
     def parkinson_stream(attributes):
         output = parkinsonAgentExecutor.invoke(
-            {"input": """"Use the diagnostic tool to check for parkinson using the given health details. 
+            {"input": """Use the diagnostic tool to check for parkinson using the given health details. 
               If the result is parkinson =[0], there’s no disease. If it’s parkinson =[1], the disease is present.
               After the analysis, respond with suitable information. Input: """ + str(attributes)})
-        yield f"data: {output['output']}\n\n"
+        for chunk in parkinsonChain.stream({"result": str(output["output"])}):
+            yield f"data: {chunk}\n\n"
 
     return StreamingResponse(parkinson_stream(attributes=attributes), media_type="text/event-stream")

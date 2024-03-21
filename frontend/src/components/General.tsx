@@ -48,6 +48,7 @@ function General() {
         margin: "5px",
         backgroundColor: "#ffd23f",
         alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -57,9 +58,9 @@ function General() {
           </label>
 
           <textarea
-            className="form-control me-lg-5 mt-lg-2 mb-lg-2"
+            className="form-control"
             id="question"
-            rows={5}
+            rows={7}
             placeholder="Enter your query here"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -68,7 +69,7 @@ function General() {
           <div className="d-flex ">
             <button
               type="submit"
-              className="btn btn-primary btn-lg mb-3 mt-3 me-lg-5 ms-auto pt-0 pt-md-1"
+              className="btn btn-primary btn-lg mb-3 mt-3  ms-auto pt-0 pt-md-1"
             >
               Send
             </button>
@@ -79,9 +80,9 @@ function General() {
             Answer
           </label>
           <textarea
-            className="form-control me-lg-5 mt-lg-2 mb-lg-2"
+            className="form-control"
             id="answer"
-            rows={5}
+            rows={7}
             value={data}
             readOnly={true}
             style={{ width: "90vw" }}
