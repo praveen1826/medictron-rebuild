@@ -15,7 +15,7 @@ class Medictron:
         )
         prompt = prompt
         messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "You are an AI Doctor That Diagnoses Patients"},
             {"role": "user", "content": prompt}
         ]
         text = self.tokenizer.apply_chat_template(

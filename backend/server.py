@@ -56,7 +56,7 @@ async def general_chat(request: Request):
 
     def stream_text():
         generation_kwargs = dict(inputs=medictron.model_inputs.input_ids,
-                                 streamer=medictron.streamer, max_new_tokens=20)
+                                 streamer=medictron.streamer, max_new_tokens=40)
         thread = Thread(target=medictron.model.generate,
                         kwargs=generation_kwargs)
         thread.start()
