@@ -1,3 +1,4 @@
+from threading import Thread
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 from langchain.prompts import ChatPromptTemplate
@@ -6,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from diseases.diabetes import Diabetes
 from diseases.parkinson import Parkinson
+from diseases.medictron import Medictron
 from langchain.globals import set_debug
 
 load_dotenv()
@@ -43,6 +45,25 @@ async def general_chat(request: Request):
             print(chunk)
             yield f"data: {chunk}\n\n"
     return StreamingResponse(stream_text(body), media_type="text/event-stream")
+
+
+@app.post("/medictron-chat")
+async def general_chat(request: Request):
+    body = await request.json()
+    print(body)
+
+    medictron = Medictron(str(body["message"]))
+
+    def stream_text():
+        generation_kwargs = dict(inputs=medictron.model_inputs.input_ids,
+                                 streamer=medictron.streamer, max_new_tokens=20)
+        thread = Thread(target=medictron.model.generate,
+                        kwargs=generation_kwargs)
+        thread.start()
+        for chunk in medictron.streamer:
+            print(chunk, end="", flush=True)
+            yield f"data: {chunk}\n\n"
+    return StreamingResponse(stream_text(), media_type="text/event-stream")
 
 
 @app.post("/diabetes-direct")
