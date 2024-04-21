@@ -39,6 +39,11 @@ function NavigationBar() {
                 </a>
               </li>
               <li className="nav-item">
+                <a className="nav-link" href="/anemia">
+                  Anemia
+                </a>
+              </li>
+              <li className="nav-item">
                 <a className="nav-link" href="/parkinson">
                   Parkinson
                 </a>

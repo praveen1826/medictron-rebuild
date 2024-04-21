@@ -2,15 +2,11 @@ import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useState } from "react";
 
 interface Attributes {
-  Pregnancies: number;
-  Glucose: number;
-  BloodPressure: number;
-  SkinThickness: number;
-  Insulin: number;
-  BMI: number;
-  DiabetesPedigreeFunction: number;
-  Age: number;
-  // Add more fields as needed
+  Gender: number;
+  Hemoglobin: number;
+  MCH: number;
+  MCHC: number;
+  MCV: number;
 }
 
 type Props = {
@@ -42,16 +38,13 @@ const FormItem: React.FC<Props> = ({ attribute, value, handleInputChange }) => {
   );
 };
 
-function Diabetes() {
+function Anemia() {
   const [attributes, setAttributes] = useState<Attributes>({
-    Pregnancies: 0,
-    Glucose: 103,
-    BloodPressure: 110,
-    SkinThickness: 35,
-    Insulin: 0,
-    BMI: 16,
-    DiabetesPedigreeFunction: 0.627,
-    Age: 22,
+    Gender: 0,
+    Hemoglobin: 14.8,
+    MCH: 28.5,
+    MCHC: 32.6,
+    MCV: 87.3,
   });
   const [data, setData] = useState("");
 
@@ -59,12 +52,10 @@ function Diabetes() {
     return text.replace(/content="/g, "");
   };
 
-  // console.log(attributesArray);
-
   const postMessage = async (formData: any) => {
     let temp_data = "";
     try {
-      await fetchEventSource("http://localhost:8000/diabetes", {
+      await fetchEventSource("http://localhost:8000/anemia", {
         method: "Post",
         body: formData,
         openWhenHidden: true,
@@ -82,7 +73,7 @@ function Diabetes() {
 
   const postDirectResult = (formData: any) => {
     try {
-      fetchEventSource("http://localhost:8000/diabetes-direct", {
+      fetchEventSource("http://localhost:8000/anemia-direct", {
         method: "POST",
         openWhenHidden: true,
         body: formData,
@@ -180,4 +171,4 @@ function Diabetes() {
   );
 }
 
-export default Diabetes;
+export default Anemia;

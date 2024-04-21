@@ -51,7 +51,6 @@ class Diabetes:
 
         values = [float(value) for value in query.values()]
 
-        # Convert the list of values to a numpy array and store it in 'test_value'
         test_value = np.array(values)
         sc = StandardScaler()
 

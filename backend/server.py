@@ -1,4 +1,3 @@
-from threading import Thread
 from langchain_google_genai import ChatGoogleGenerativeAI
 from dotenv import load_dotenv
 from langchain.prompts import ChatPromptTemplate
@@ -8,6 +7,7 @@ from fastapi.responses import StreamingResponse
 from diseases.diabetes import Diabetes
 from diseases.parkinson import Parkinson
 from diseases.medictron import Medictron
+from diseases.anemia import Anemia
 from langchain.globals import set_debug
 
 load_dotenv()
@@ -29,7 +29,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_headers=["*"],
     allow_methods=["*"]
 )
@@ -47,23 +47,17 @@ async def general_chat(request: Request):
     return StreamingResponse(stream_text(body), media_type="text/event-stream")
 
 
+medictron = Medictron()
+
+
 @app.post("/medictron-chat")
 async def general_chat(request: Request):
     body = await request.json()
     print(body)
 
-    medictron = Medictron(str(body["message"]))
+    prompt = str(body['message'])
 
-    def stream_text():
-        generation_kwargs = dict(inputs=medictron.model_inputs.input_ids,
-                                 streamer=medictron.streamer, max_new_tokens=40)
-        thread = Thread(target=medictron.model.generate,
-                        kwargs=generation_kwargs)
-        thread.start()
-        for chunk in medictron.streamer:
-            print(chunk, end="", flush=True)
-            yield f"data: {chunk}\n\n"
-    return StreamingResponse(stream_text(), media_type="text/event-stream")
+    return StreamingResponse(medictron.stream_response(prompt), media_type="text/event-stream")
 
 
 @app.post("/diabetes-direct")
@@ -90,6 +84,23 @@ async def general_chat(Pregnancies: int = Form(...),
 
     def stream_text():
         yield f"data: {diabetes_direct}\n\n"
+    return StreamingResponse(stream_text(), media_type="text/event-stream")
+
+
+@app.post("/anemia-direct")
+async def anemia_direct(Gender: int = Form(...), Hemoglobin: float = Form(...), MCH: float = Form(...), MCHC: float = Form(...), MCV: float = Form(...)):
+    attributes = {
+        "Gender": Gender,
+        "Hemoglobin": Hemoglobin,
+        "MCH": MCH,
+        "MCHC": MCHC,
+        "MCV": MCV
+    }
+    anemia_result = Anemia(llm=llm).anemia(str(attributes))
+
+    def stream_text():
+        yield f"data: {anemia_result}\n\n"
+
     return StreamingResponse(stream_text(), media_type="text/event-stream")
 
 
@@ -185,6 +196,29 @@ async def diabetes_chat(Pregnancies: int = Form(...),
             yield f"data: {chunk}\n\n"
 
     return StreamingResponse(diabetes_stream(attributes=attributes), media_type="text/event-stream")
+
+
+@app.post("/anemia")
+async def anemia_chat(Gender: int = Form(...), Hemoglobin: float = Form(...), MCH: float = Form(...), MCHC: float = Form(...), MCV: float = Form(...)):
+    attributes = {
+        "Gender": Gender,
+        "Hemoglobin": Hemoglobin,
+        "MCH": MCH,
+        "MCHC": MCHC,
+        "MCV": MCV
+    }
+    print(attributes)
+    anemia = Anemia(llm=llm)
+    anemiaAgentExecutor = anemia.anemiaAgentExecutor
+    anemiaChain = anemia.anemiaChain
+
+    def anemia_stream(attributes):
+        output = anemiaAgentExecutor.invoke(
+            {"input": """Use the diagnostic tool to check for anemia using the given health details. If the result is anemia =[0], there's no disease. If it's anemia =[1], the disease is present. After the analysis, respond with suitable information. Input: """ + str(attributes)})
+        for chunk in anemiaChain.stream({"result": str(output["output"])}):
+            yield f"data: {chunk}\n\n"
+
+    return StreamingResponse(anemia_stream(attributes=attributes), media_type="text/event-stream")
 
 
 @app.post("/parkinson")

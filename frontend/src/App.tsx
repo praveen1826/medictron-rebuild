@@ -5,6 +5,7 @@ import NavigationBar from "./components/NavigationBar";
 import General from "./components/General";
 import Diabetes from "./components/Diabetes";
 import Parkinson from "./components/Parkinson";
+import Anemia from "./components/Anemia";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/" Component={General} />
             <Route path="/diabetes" Component={Diabetes} />
+            <Route path="/anemia" Component={Anemia} />
             <Route path="/parkinson" Component={Parkinson} />
           </Routes>
         </div>

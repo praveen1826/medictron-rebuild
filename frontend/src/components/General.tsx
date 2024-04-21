@@ -90,9 +90,8 @@ function General() {
         }),
         onmessage(ev) {
           console.log(ev.data);
-          temp_data += removeContent(String(ev.data));
-          console.log(temp_data);
-          setData(temp_data);
+          const data = removeContent(String(ev.data));
+          setData((prevData: any) => prevData + data);
         },
       });
     } catch (error) {
@@ -102,10 +101,12 @@ function General() {
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
+    setData("");
     postMessage(message, "http://localhost:8000/chat", setData, removeContent);
   };
   const handleMedictronSubmit = (event: any) => {
     event.preventDefault();
+    setMedictronData("");
     postMessage(
       medictronMessage,
       "http://localhost:8000/medictron-chat",
