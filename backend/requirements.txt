@@ -6,3 +6,8 @@ numpy==1.26.4
 python-dotenv==1.0.1
 scikit_learn==1.2.2
 transformers==4.39.0
+uvicorn==0.29.0
+accelerate==0.29.3
+python-multipart==0.0.9
+langchainhub==0.1.15
+xgboost==2.0.3
